@@ -1,0 +1,1 @@
+# electronics_retail_chain__test_task
