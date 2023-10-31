@@ -52,9 +52,9 @@ class NetworkElement(models.Model):
     """
 
     LEVEL = [
-        (0, 0),
-        (1, 1),
-        (2, 2),
+        (0, '0'),
+        (1, '1'),
+        (2, '2'),
     ]
 
     name = models.CharField(max_length=100, verbose_name='Название')
