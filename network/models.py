@@ -1,6 +1,12 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 NULLABLE = {'null': True, 'blank': True}
+
+
+def validate_provider_not_self(value):
+    if value == value.provider:
+        raise ValidationError('Поставщик не может поставлять товар сам себе.')
 
 
 # Create your models here.
@@ -60,7 +66,8 @@ class NetworkElement(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
     contacts = models.ForeignKey('Contact', on_delete=models.CASCADE, verbose_name='Контакт')
     product = models.ForeignKey('Product', on_delete=models.CASCADE, verbose_name='Продукт')
-    provider = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='Поставщик', **NULLABLE)
+    provider = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='Поставщик',
+                                 validators=[validate_provider_not_self], **NULLABLE)
     debt = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Задолженность')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Время создания')
-    level = models.CharField(max_length=50, choices=LEVEL)
+    level = models.CharField(max_length=50, choices=LEVEL, **NULLABLE)
