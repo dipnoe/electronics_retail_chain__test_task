@@ -7,7 +7,7 @@ class NetworkElementSerializer(serializers.ModelSerializer):
     class Meta:
         model = NetworkElement
         fields = ('name', 'contacts', 'product', 'provider', 'debt', 'created_at', 'level',)
-        read_only_fields = ('debt',)
+        read_only_fields = ('debt', 'level',)
 
     def set_level(self, validated_data):
         provider = validated_data.get('provider')

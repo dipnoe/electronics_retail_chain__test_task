@@ -43,7 +43,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework_simplejwt',
-    'django_filters',
+    'drf_yasg',
 
     'users',
     'network',
@@ -84,6 +84,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
+        'HOST': getenv('DB_HOST'),
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': getenv('DB_NAME'),
         'USER': getenv('DB_USER'),
