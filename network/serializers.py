@@ -44,13 +44,10 @@ class NetworkElementSerializer(serializers.ModelSerializer):
     def validate(self, data):
         provider = data.get('provider')
         level = data.get('level')
-        if provider and provider.level is not None:
+        if provider and level:
             if level == '0':
                 raise serializers.ValidationError("У 0 уровня не может быть поставщика")
-            elif provider.level > level:
+            elif provider.level < level:
                 raise serializers.ValidationError("Поставщик должен быть предыдущим по иерархии звеном.")
-        else:
-            if level != '0':
-                raise serializers.ValidationError("Только у завода не может быть поставщика.")
 
         return data
