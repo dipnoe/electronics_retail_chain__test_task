@@ -39,7 +39,7 @@ class NetworkElementTestCase(APITestCase):
             name='Test network element',
             contacts=self.contacts,
             product=self.product,
-            level=0,
+            level='0'
         )
 
     def test_create_network_element(self):
@@ -51,8 +51,7 @@ class NetworkElementTestCase(APITestCase):
             'name': 'Test name',
             'contacts': self.contacts.pk,
             'product': self.product.pk,
-            'provider': self.network_element.pk,
-            'level': 1
+            'provider': self.network_element.pk
         }
         response = self.client.post(
             reverse('network:network_element_create'),
@@ -72,7 +71,6 @@ class NetworkElementTestCase(APITestCase):
         )
 
     def test_negative_create_network_element(self):
-
         self.client.force_authenticate(self.user)
 
         data = {
@@ -85,6 +83,53 @@ class NetworkElementTestCase(APITestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_400_BAD_REQUEST
+        )
+
+    def test_greater_than_2_level(self):
+        self.client.force_authenticate(self.user)
+
+        data = {
+            'level': '3'
+        }
+        response = self.client.patch(
+            reverse('network:network_element_update', kwargs={'pk': self.network_element.pk}),
+            data=data
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(
+            response.json()['level'],
+            '0'
+        )
+
+    def test_provider_level(self):
+        self.client.force_authenticate(self.user)
+
+        network_element = NetworkElement.objects.create(
+            name='Test IE',
+            contacts=self.contacts,
+            product=self.product,
+            provider=self.network_element,
+            level='2'
+        )
+        data = {
+            'provider': 8
+        }
+        response = self.client.patch(
+            reverse('network:network_element_update', kwargs={'pk': self.network_element.pk}),
+            data=data
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST
+        )
+        self.assertEqual(
+            response.json(),
+            [f'Нельзя выбрать {network_element.name} поставщиком.']
         )
 
     def test_list_network_element(self):
