@@ -44,6 +44,7 @@ class NetworkElementTestCase(APITestCase):
 
     def test_create_network_element(self):
         """ Test creating a network element """
+        # Authenticate the client with the test user
 
         self.client.force_authenticate(self.user)
 
@@ -71,6 +72,7 @@ class NetworkElementTestCase(APITestCase):
         )
 
     def test_negative_create_network_element(self):
+        """ Test creating a network element with missing data """
         self.client.force_authenticate(self.user)
 
         data = {
@@ -85,7 +87,8 @@ class NetworkElementTestCase(APITestCase):
             status.HTTP_400_BAD_REQUEST
         )
 
-    def test_greater_than_2_level(self):
+    def test_invalid_level(self):
+        """ Test updating network element level to a invalid value (greater than 2) """
         self.client.force_authenticate(self.user)
 
         data = {
@@ -106,6 +109,7 @@ class NetworkElementTestCase(APITestCase):
         )
 
     def test_provider_level(self):
+        """ Test setting an invalid provider for a network element """
         self.client.force_authenticate(self.user)
 
         network_element = NetworkElement.objects.create(
@@ -150,6 +154,7 @@ class NetworkElementTestCase(APITestCase):
         )
 
     def test_retrieve_network_element(self):
+        """ Test retrieving details of a network element """
         self.client.force_authenticate(self.user)
 
         response = self.client.get(
@@ -167,6 +172,7 @@ class NetworkElementTestCase(APITestCase):
         )
 
     def test_update_network_element(self):
+        """ Test updating a network element """
         self.client.force_authenticate(self.user)
         data = {
             'name': 'New name'
@@ -187,6 +193,7 @@ class NetworkElementTestCase(APITestCase):
         )
 
     def test_destroy_network_element(self):
+        """ Test deleting a network element """
         self.client.force_authenticate(self.user)
 
         response = self.client.delete(
