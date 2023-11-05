@@ -1,15 +1,16 @@
 from rest_framework import serializers
-
 from network.models import NetworkElement
 
 
 class NetworkElementSerializer(serializers.ModelSerializer):
+    """ Serializer for the NetworkElement model. """
     class Meta:
         model = NetworkElement
         fields = ('name', 'contacts', 'product', 'provider', 'debt', 'created_at', 'level',)
         read_only_fields = ('debt', 'level',)
 
     def set_level(self, validated_data):
+        """ Set the 'level' field based on the 'provider' field. """
         provider = validated_data.get('provider')
         level = self.data.get('level') if provider else '0'
 
@@ -24,11 +25,13 @@ class NetworkElementSerializer(serializers.ModelSerializer):
         validated_data['level'] = level
 
     def create(self, validated_data):
+        """ Create a new NetworkElement instance with validated data. """
         self.set_level(validated_data)
         instance = NetworkElement.objects.create(**validated_data)
         return instance
 
     def update(self, instance, validated_data):
+        """ Update an existing NetworkElement instance with validated data. """
         try:
             self.set_level(validated_data)
         except serializers.ValidationError as e:
@@ -42,6 +45,7 @@ class NetworkElementSerializer(serializers.ModelSerializer):
             return instance
 
     def validate(self, data):
+        """ Validate the 'provider' and 'level' relationships. """
         provider = data.get('provider')
         level = data.get('level')
         if provider and level:
