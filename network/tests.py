@@ -1,6 +1,9 @@
 import datetime
+import json
+from network.serializers import ContactSerializer
 
 import jwt
+from django.core import serializers
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -42,13 +45,22 @@ class NetworkElementTestCase(APITestCase):
 
         data = {
             'name': 'Test name',
-            'contacts': self.contacts.pk,
-            'provider': self.network_element.pk
+            'contacts': {
+                'email': 'contact2@test.com',
+                'country': 'Canada',
+                'city': 'Quebec',
+                'street': 'Rue Fortin',
+                'building_num': 236
+            },
+            'products_ids': []
         }
+
         response = self.client.post(
             reverse('network:network_element_create'),
-            data=data
+            data=data,
+            format='json'
         )
+
         self.assertEqual(
             response.status_code,
             status.HTTP_201_CREATED
@@ -58,8 +70,8 @@ class NetworkElementTestCase(APITestCase):
             2
         )
         self.assertEqual(
-            NetworkElement.objects.get(pk=1).name,
-            'Test network element'
+            NetworkElement.objects.get(pk=2).name,
+            'Test name'
         )
 
     def test_negative_create_network_element(self):
@@ -105,16 +117,18 @@ class NetworkElementTestCase(APITestCase):
 
         network_element = NetworkElement.objects.create(
             name='Test IE',
-            contacts=self.contacts,
-            provider=self.network_element,
+            contacts=Contact.objects.get(pk=self.contacts.pk),
+            # provider=NetworkElement.objects.get(pk=self.network_element.pk).pk,
             level='2'
         )
+
         data = {
-            'provider': 8
+            'provider': network_element.pk
         }
+
         response = self.client.patch(
             reverse('network:network_element_update', kwargs={'pk': self.network_element.pk}),
-            data=data
+            data=data,
         )
 
         self.assertEqual(
