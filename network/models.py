@@ -22,7 +22,7 @@ class Contact(models.Model):
     - street (CharField): The street.
     - building_num (PositiveSmallIntegerField): The building number.
     """
-    email = models.EmailField(verbose_name='Почта')
+    email = models.EmailField(verbose_name='Почта', unique=True)
     country = models.CharField(max_length=100, verbose_name='Страна')
     city = models.CharField(max_length=100, verbose_name='Город')
     street = models.CharField(max_length=100, verbose_name='Улица')
