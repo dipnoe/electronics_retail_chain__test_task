@@ -1,5 +1,8 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from network.models import NetworkElement, Product
+from rest_framework.fields import SerializerMethodField
+
+from network.models import NetworkElement, Product, Contact
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -8,15 +11,24 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = '__all__'
+
+
 class NetworkElementSerializer(serializers.ModelSerializer):
     """ Serializer for the NetworkElement model. """
-    # products = serializers.ListField(
-    #     child=serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), many=False))
     products = ProductSerializer(many=True, read_only=True)
+    products_ids = serializers.ListField(
+        write_only=True,
+        child=serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), many=False)
+    )
+    contacts = ContactSerializer(read_only=False, many=False)
 
     class Meta:
         model = NetworkElement
-        fields = ('name', 'contacts', 'provider', 'products', 'debt', 'created_at', 'level',)
+        fields = ('name', 'contacts', 'provider', 'products', 'debt', 'created_at', 'level', 'products_ids',)
         read_only_fields = ('debt', 'level',)
 
     def set_level(self, validated_data):
@@ -37,13 +49,11 @@ class NetworkElementSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """ Create a new NetworkElement instance with validated data. """
         self.set_level(validated_data)
-        product_instances = validated_data.pop('products')
-        instance = NetworkElement.objects.create(**validated_data)
-        products_ = Product.objects.all()
-        # for product in products_:
-        #     print(product.pk)
-            # if products_.get(pk=product.pk):
-            #     instance.products.set(product)
+        products = validated_data.pop('products_ids')
+        contacts = validated_data.pop('contacts')
+        contacts_instance = Contact.objects.create(**contacts)
+        instance = NetworkElement.objects.create(**validated_data, contacts=contacts_instance)
+        instance.products.set(products)
 
         return instance
 
@@ -54,17 +64,31 @@ class NetworkElementSerializer(serializers.ModelSerializer):
         except serializers.ValidationError as e:
             raise e
         else:
+            try:
+                contact = get_object_or_404(Contact, pk=instance.contacts.pk)
+                contacts_update = validated_data.pop('contacts')
+                for attr, value in contacts_update.items():
+                    setattr(contact, attr, value)
+                contact.save()
+            except KeyError as k:
+                print(k)
             for attr, value in validated_data.items():
                 setattr(instance, attr, value)
-
+            try:
+                products = validated_data.pop('products_ids')
+                instance.products.set(products)
+            except KeyError as k:
+                print(k)
+        finally:
             instance.save()
 
-            return instance
+        return instance
 
     def validate(self, data):
         """ Validate the 'provider' and 'level' relationships. """
         provider = data.get('provider')
         level = data.get('level')
+        products_ids = data.get('products_ids')
         if provider and level:
             if level == '0':
                 raise serializers.ValidationError("У 0 уровня не может быть поставщика")
