@@ -5,8 +5,12 @@ NULLABLE = {'null': True, 'blank': True}
 
 
 def validate_provider_not_self(value):
-    if value == NetworkElement.objects.get(pk=value).provider:
-        raise ValidationError('Поставщик не может поставлять товар сам себе.')
+    if isinstance(value, int):
+        if value == NetworkElement.objects.get(pk=value).provider.pk:
+            raise ValidationError('Поставщик не может поставлять товар сам себе.')
+    elif isinstance(value, NetworkElement) and value.provider:
+        if value.pk == value.provider.pk:
+            raise ValidationError('Поставщик не может поставлять товар сам себе.')
 
 
 # Create your models here.
