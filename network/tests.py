@@ -27,18 +27,10 @@ class NetworkElementTestCase(APITestCase):
             building_num=235
         )
 
-        # Create a test product
-        self.product = Product.objects.create(
-            name='Test name',
-            model='Test model',
-            launch_date=datetime.date.today()
-        )
-
         # Create a test network element
         self.network_element = NetworkElement.objects.create(
             name='Test network element',
             contacts=self.contacts,
-            product=self.product,
             level='0'
         )
 
@@ -51,7 +43,6 @@ class NetworkElementTestCase(APITestCase):
         data = {
             'name': 'Test name',
             'contacts': self.contacts.pk,
-            'product': self.product.pk,
             'provider': self.network_element.pk
         }
         response = self.client.post(
@@ -115,7 +106,6 @@ class NetworkElementTestCase(APITestCase):
         network_element = NetworkElement.objects.create(
             name='Test IE',
             contacts=self.contacts,
-            product=self.product,
             provider=self.network_element,
             level='2'
         )
