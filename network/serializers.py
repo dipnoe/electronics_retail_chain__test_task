@@ -29,7 +29,7 @@ class NetworkElementSerializer(serializers.ModelSerializer):
     class Meta:
         model = NetworkElement
         fields = ('name', 'contacts', 'provider', 'products', 'debt', 'created_at', 'level', 'products_ids',)
-        read_only_fields = ('debt', 'level',)
+        read_only_fields = ('debt', 'level', 'created_at',)
 
     def set_level(self, validated_data):
         """ Set the 'level' field based on the 'provider' field. """
