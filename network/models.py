@@ -5,7 +5,7 @@ NULLABLE = {'null': True, 'blank': True}
 
 
 def validate_provider_not_self(value):
-    if value == value.provider:
+    if value == NetworkElement.objects.get(pk=value).provider:
         raise ValidationError('Поставщик не может поставлять товар сам себе.')
 
 
@@ -50,7 +50,7 @@ class NetworkElement(models.Model):
     Fields:
     - name (CharField): The name of the network element.
     - contacts (ForeignKey to Contact): Contact information of the network element.
-    - product (ForeignKey to Product): The product associated with the network element.
+    - products (ManyToManyField to Product): Products associated with the network element.
     - provider (ForeignKey to self): The provider network element (previous network object in hierarchy).
     - debt (DecimalField): Debt to the supplier in monetary terms accurate to penny.
     - created_at (DateTimeField): The timestamp when the network element was created (auto-generated).
@@ -65,7 +65,7 @@ class NetworkElement(models.Model):
 
     name = models.CharField(max_length=100, verbose_name='Название')
     contacts = models.ForeignKey('Contact', on_delete=models.CASCADE, verbose_name='Контакт')
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, verbose_name='Продукт')
+    products = models.ManyToManyField('Product', verbose_name='Продукты', **NULLABLE)
     provider = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='Поставщик',
                                  validators=[validate_provider_not_self], **NULLABLE)
     debt = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Задолженность')

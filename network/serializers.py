@@ -1,12 +1,22 @@
 from rest_framework import serializers
-from network.models import NetworkElement
+from network.models import NetworkElement, Product
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
 
 
 class NetworkElementSerializer(serializers.ModelSerializer):
     """ Serializer for the NetworkElement model. """
+    # products = serializers.ListField(
+    #     child=serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), many=False))
+    products = ProductSerializer(many=True, read_only=True)
+
     class Meta:
         model = NetworkElement
-        fields = ('name', 'contacts', 'product', 'provider', 'debt', 'created_at', 'level',)
+        fields = ('name', 'contacts', 'provider', 'products', 'debt', 'created_at', 'level',)
         read_only_fields = ('debt', 'level',)
 
     def set_level(self, validated_data):
@@ -27,7 +37,14 @@ class NetworkElementSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """ Create a new NetworkElement instance with validated data. """
         self.set_level(validated_data)
+        product_instances = validated_data.pop('products')
         instance = NetworkElement.objects.create(**validated_data)
+        products_ = Product.objects.all()
+        # for product in products_:
+        #     print(product.pk)
+            # if products_.get(pk=product.pk):
+            #     instance.products.set(product)
+
         return instance
 
     def update(self, instance, validated_data):

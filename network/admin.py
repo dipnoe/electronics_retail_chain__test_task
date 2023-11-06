@@ -5,8 +5,8 @@ from network.models import NetworkElement, Contact, Product
 
 @admin.register(NetworkElement)
 class NetworkElementAdmin(admin.ModelAdmin):
-    list_display = ['name', 'contacts', 'product', 'provider', 'debt', 'created_at', 'level']
-    list_display_links = ['provider']
+    list_display = ['name', 'contacts', 'provider', 'debt', 'created_at', 'level']
+    list_display_links = ['name', 'provider']
     list_filter = ['provider__contacts__city']
     actions = ["clear_debt"]
 
